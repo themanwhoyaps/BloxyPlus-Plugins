@@ -1,0 +1,351 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- Creates a window for the menu
+local Window = Rayfield:CreateWindow({
+	Name = "Bloxy+ Plugins",
+	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+	LoadingTitle = "Loading | Bloxy+",
+	LoadingSubtitle = "by The Rizz Gang 🙊🔥🤯",
+	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+
+	DisableRayfieldPrompts = false,
+	DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+
+	ConfigurationSaving = {
+		Enabled = true,
+		FolderName = nil, -- Create a custom folder for your hub/game
+		FileName = "Big Hub"
+	},
+
+	Discord = {
+		Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+		Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+		RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+	},
+
+	KeySystem = false, -- Set this to true to use our key system
+	KeySettings = {
+		Title = "Untitled",
+		Subtitle = "Key System",
+		Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
+		FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+		SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+		GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+		Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+	}
+})
+
+-- Loads stuff idk
+Rayfield:LoadConfiguration()
+
+-- Game detector and notifications and variables and functions.
+
+function fetchgamedetails()
+	local details = {}
+	local GetName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+
+	local PLACEIDGET = game.PlaceId
+	table.insert(details, GetName.Name)
+	table.insert(details, game.PlaceId)
+	table.insert(details, game.JobId)
+	table.insert(details, game.GameId)
+	table.insert(details, math.floor(game.Workspace.DistributedGameTime / 60))
+
+	return details
+end
+
+function supportedgamedetection()
+	local supportedgame = nil
+	if game.PlaceId == 2913303231 then
+		Rayfield:Notify({
+			Title = "Supported Game Detected!",
+			Content = "Supported game: " .. fetchgamedetails()[1],
+			Duration = 8,
+			Image = "badge-check",
+		})
+		supportedgame = "obbycreator"
+	end
+
+	return supportedgame
+end
+
+-- Notification, makes it wait awhile before showing the next notification (doesnt interfere)
+task.spawn(function()
+	task.wait(2)
+	Rayfield:Notify({
+		Title = "V0.1 ALPHA",
+		Content = "Bloxy+ menu | 0.1 Alpha Release",
+		Duration = 5,
+		Image = "circle-alert",
+	})	
+end)
+
+-- Tabs
+-- Creates a tab
+local Tab = Window:CreateTab("Welcome", "party-popper")
+-- Creates a paragraph 
+local Paragraph = Tab:CreateParagraph({Title = "Welcome to Bloxy+!", Content = "Bloxy+ is a menu providing client sided plugins to improve & inhance Roblox."})
+-- Creates a section between the paragraph above and below
+local Divider = Tab:CreateDivider()
+
+local Paragraph = Tab:CreateParagraph({Title = "Are these exploits?", Content = "Bloxy+ does not provide exploits & hacks, insteads trys to inhance your experience in Roblox!"})
+local Paragraph = Tab:CreateParagraph({Title = "Can I get banned from this?", Content = "Technically there is a chance, Bloxy+ isn't ment to be a hack client but improve gameplay. But sometimes theres a small chance that you COULD be banned from using this."})
+
+local Divider = Tab:CreateDivider()
+-- Thankyou message
+local Paragraph = Tab:CreateParagraph({Title = "Thank you!", Content = "Thank you for using Bloxy+. Any questions, bugs & more can be asked in the discord server. Enjoy!"})
+
+-- Tab
+local PluginTab = Window:CreateTab("Plugins", "blocks")
+local ServerDetails = Window:CreateTab("Server Details", "wifi")
+
+-- ADDS SPECIAL GAME-RELATED CUSTOM TABS
+if supportedgamedetection() == "obbycreator" then
+	local SPECIALobbycreator = Window:CreateTab("[S] Obby Creator", "bolt")
+	-- buttons
+		-- steal obby >:)
+	local Button = SPECIALobbycreator:CreateButton({
+		Name = "Instantly claim a plot",
+		Callback = function()
+			local yourplot = workspace.Obbies:FindFirstChild(game.Players.LocalPlayer.Name)
+			if yourplot == nil then
+				local plotmodelorwhatever = workspace.Obbies:FindFirstChild("Obby").GetObby.Gate
+				local char = game.Players.LocalPlayer.Character
+				firetouchinterest(char.HumanoidRootPart, plotmodelorwhatever, 0)
+				task.wait(1)
+				firetouchinterest(char.HumanoidRootPart, plotmodelorwhatever, 1)
+			else
+				-- sends a notification if already claimed
+				Rayfield:Notify({
+					Title = "Plot already claimed",
+					Content = "You already claimed a plot you dingdong.",
+					Duration = 5,
+					Image = "circle-alert",
+				})
+			end
+		end,
+	})
+end
+
+
+
+local Section = PluginTab:CreateSection("Plugins")
+-- Buttons
+-------------------------------------------
+local Button = PluginTab:CreateButton({
+	Name = "Ultimate Performance Optimizer",
+	Callback = function()
+		loadstring(game:HttpGet('https://raw.githubusercontent.com/Ep1callel/PerformanceOptimizer/refs/heads/main/Script'))()
+	end,
+})
+
+pingobj = nil
+pingenabled = false
+
+local Toggle = PluginTab:CreateToggle({
+	Name = "Show ping",
+	CurrentValue = false,
+	Flag = "ShowPing", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+	Callback = function(ping_Enabled)
+		local playergui = game.Players.LocalPlayer.PlayerGui
+		pingenabled = ping_Enabled
+		if ping_Enabled then
+			if playergui:FindFirstChild("Ping Displayer") == nil then
+				
+				local screengui = Instance.new("ScreenGui")
+				screengui.Name = "Ping Displayer"
+				screengui.Parent = playergui
+				screengui.ResetOnSpawn = false
+				local frame = Instance.new("Frame")
+				local textlabel = Instance.new("TextLabel")
+				local uiaspectratioconstraint = Instance.new("UIAspectRatioConstraint")
+				local uicorner = Instance.new("UICorner")
+				local uidragdetector = Instance.new("UIDragDetector")
+				
+				frame.Parent = screengui
+				textlabel.Parent = frame
+				uiaspectratioconstraint.Parent = frame
+				uicorner.Parent = frame
+				uidragdetector.Parent = frame
+				
+				frame.AnchorPoint = Vector2.new(0.5, 0.5)
+				frame.BackgroundColor3 = Color3.new(0, 0, 0)
+				frame.BackgroundTransparency = 0.3
+				frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+				frame.Size = UDim2.new(1, 0, 0.06, 0)
+				
+				textlabel.RichText = true
+				textlabel.BackgroundTransparency = 1
+				textlabel.Interactable = false
+				textlabel.Position = UDim2.new(0.053, 0,0.068, 0)
+				textlabel.Size = UDim2.new(0.89, 0,0.81, 0)
+				textlabel.Text = "<b><i> Loading Ping... </i></b>"
+				textlabel.TextColor3 = Color3.new(1, 1, 1)
+				textlabel.TextScaled = true
+				textlabel.TextWrapped = true
+				
+				uiaspectratioconstraint.AspectRatio = 3.5
+				
+				uicorner.CornerRadius = UDim.new(100, 100)
+				
+				uidragdetector.DragSpace = Enum.UIDragDetectorDragSpace.Reference
+				uidragdetector.BoundingUI = screengui
+				pingobj = textlabel
+			end
+			
+		else
+			pingobj = nil
+			playergui:FindFirstChild("Ping Displayer"):Destroy()
+		end
+	end,
+})
+
+task.spawn(function()
+	local Stats = game:GetService("Stats")
+	local RunService = game:GetService("RunService")
+	while nil == nil do
+		if pingenabled == true then
+			task.wait(1)
+			local ping = math.round(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+			if pingobj ~= nil then
+				pingobj.Text = "<b><i>" .. ping .. " ms </i></b>"
+			end
+		else
+			task.wait(1)
+		end
+	end
+end)
+
+local Toggle = PluginTab:CreateToggle({
+	Name = "Open Notepad",
+	CurrentValue = false,
+	Flag = "ShowNotePad",
+	Callback = function(ping_Enabled)
+		local playergui = game.Players.LocalPlayer.PlayerGui
+
+		if ping_Enabled then
+			
+			Rayfield:Notify({
+				Title = "Disclaimer",
+				Content = "Text wrote within notepad will not save.",
+				Duration = 5,
+				Image = "circle-alert",
+			})
+			
+			if playergui:FindFirstChild("BloxyNotepad") == nil then
+				local screengui = Instance.new("ScreenGui")
+				screengui.Name = "BloxyNotepad"
+				screengui.Parent = playergui
+				screengui.ResetOnSpawn = false
+				local frame = Instance.new("Frame")
+				local textlabel = Instance.new("TextLabel")
+				local textbox = Instance.new("TextBox")
+				local uiaspectratioconstraint = Instance.new("UIAspectRatioConstraint")
+				local uicorner = Instance.new("UICorner")
+				local uidragdetector = Instance.new("UIDragDetector")
+				local scrollingframe = Instance.new("ScrollingFrame")
+
+				frame.Parent = screengui
+				textlabel.Parent = frame
+				uiaspectratioconstraint.Parent = frame
+				uicorner.Parent = frame
+				uidragdetector.Parent = frame
+				scrollingframe.Parent = frame
+				textbox.Parent = scrollingframe
+
+				frame.BackgroundColor3 = Color3.new(0, 0, 0)
+				frame.BackgroundTransparency = 0.3
+				frame.Position = UDim2.new(0.153, 0,0.176, 0)
+				frame.Size = UDim2.new(0.3, 0,0, 0)
+				frame.ClipsDescendants = true
+				
+				textlabel.RichText = true
+				textlabel.BackgroundTransparency = 1
+				textlabel.Interactable = false
+				textlabel.Position = UDim2.new(0.018, 0,0.012, 0)
+				textlabel.Size = UDim2.new(0.982, 0,0.276, 0)
+				textlabel.Text = "<b><i> Bloxy+ Notepad </i></b>"
+				textlabel.TextColor3 = Color3.new(1, 1, 1)
+				textlabel.TextSize = 32
+				textlabel.TextScaled = true
+				textlabel.TextWrapped = true
+
+				uiaspectratioconstraint.AspectRatio = 3.5
+				uiaspectratioconstraint.AspectType = Enum.AspectType.ScaleWithParentSize
+
+				uicorner.CornerRadius = UDim.new(0.1, 0)
+
+				uidragdetector.DragSpace = Enum.UIDragDetectorDragSpace.Reference
+				uidragdetector.BoundingUI = screengui
+				
+				scrollingframe.BackgroundTransparency = 1
+				scrollingframe.Position = UDim2.new(0, 0,0.276, 0)
+				scrollingframe.Size = UDim2.new(1, 0,0.724, 0)
+				scrollingframe.ScrollBarThickness = 10
+				scrollingframe.ClipsDescendants = true
+				
+				textbox.BackgroundTransparency = 1
+				textbox.ClearTextOnFocus = false
+				textbox.MultiLine = true
+				textbox.Position = UDim2.new(0.052, 0,0, 0)
+				textbox.Size = UDim2.new(0.9, 0,1, 0)
+				textbox.PlaceholderText = "Type here..."
+				textbox.Text = ""
+				textbox.TextColor3 = Color3.new(1, 1, 1)
+				textbox.TextSize = 15
+				textbox.TextWrapped = true
+				textbox.TextXAlignment = Enum.TextXAlignment.Left
+				textbox.TextYAlignment = Enum.TextYAlignment.Top
+			end
+
+		else
+			playergui:FindFirstChild("BloxyNotepad"):Destroy()
+		end
+	end,
+})
+
+-- //// SERVER STUFF ////
+
+-- Toggle button
+join_log_enabled = false
+
+local Toggle = PluginTab:CreateToggle({
+	Name = "Player Logger",
+	CurrentValue = false,
+	Flag = "PlayerLogger", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+	Callback = function(Join_Log_Enabled)
+		-- The function that takes place when the toggle is pressed
+		-- The variable (Value) is a boolean on whether the toggle is true or false
+		-- grabs username
+		join_log_enabled = Join_Log_Enabled
+	end,
+})
+
+game.Players.PlayerAdded:Connect(function(player)
+	if join_log_enabled then
+		game.TextChatService.TextChannels.RBXGeneral:DisplaySystemMessage(player.Name .. " has joined the game.")
+	end
+end)
+game.Players.PlayerRemoving:Connect(function(player)
+	if join_log_enabled then
+		game.TextChatService.TextChannels.RBXGeneral:DisplaySystemMessage(player.Name .. " has left the game.")
+	end
+end)
+
+-- Server detail tab
+local GameName = ServerDetails:CreateParagraph({Title = "Game name:", Content = "..."})
+local PlaceID = ServerDetails:CreateParagraph({Title = "Place ID:", Content = "..."})
+local JobID = ServerDetails:CreateParagraph({Title = "Job ID:", Content = "..."})
+local GameID = ServerDetails:CreateParagraph({Title = "Game ID:", Content = "..."})
+local ServerAge = ServerDetails:CreateParagraph({Title = "Elapsed time, in minutes:", Content = "..."})
+
+task.spawn(function()
+	while nil == nil do
+		GameName:Set({Title = "Game name:", Content = fetchgamedetails()[1]})
+		PlaceID:Set({Title = "Place ID:", Content = fetchgamedetails()[2]})
+		JobID:Set({Title = "Job ID:", Content = fetchgamedetails()[3]})
+		GameID:Set({Title = "Game ID:", Content = fetchgamedetails()[4]})
+		ServerAge:Set({Title = "Elapsed time, in minutes:", Content = fetchgamedetails()[5]})
+
+		task.wait(5)
+	end
+end)
